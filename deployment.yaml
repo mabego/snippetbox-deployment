@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: web-app
+  name: web-app
+  namespace: web-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: web-app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: web-app
+    spec:
+      serviceAccountName: web-app-sa # secrets store service account
+      volumes:
+        - name: spc-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: web-app-spc
+      containers:
+        - image: ghcr.io/mabego/snippetbox-mysql:latest
+          name: web
+          ports:
+            - containerPort: 4000
+          volumeMounts:
+            - name: spc-volume
+              mountPath: /mnt/db-secrets-vol
+              readOnly: true
+          env:
+            - name: DSN
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets-vol
+                  key: DSN
