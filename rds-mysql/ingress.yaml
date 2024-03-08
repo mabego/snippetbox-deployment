@@ -12,7 +12,7 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-    - host: 'snippetbox.colawarrior.com'
+    - host: 'snippetbox.example.com' # update to use your domain
       http:
         paths:
           - path: /
